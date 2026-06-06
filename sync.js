@@ -97,6 +97,21 @@ function pullData(config) {
 // --- 数据推送 ---
 
 /**
+ * encodeBase64UTF8(str) -> string
+ * 输入: JavaScript 字符串(含中文等多字节字符)
+ * 输出: 正确的 Base64(UTF-8) 编码
+ */
+function encodeBase64UTF8(str) {
+  var encoder = new TextEncoder()
+  var bytes = encoder.encode(str)
+  var binary = ''
+  for (var i = 0; i < bytes.length; i++) {
+    binary += String.fromCharCode(bytes[i])
+  }
+  return btoa(binary)
+}
+
+/**
  * pushData(config, data, sha) -> Promise<{sha}>
  * 输入: AppConfig + AppData + 可选 sha(用于更新)
  * 输出: Promise,推送到 GitHub 仓库
@@ -104,7 +119,7 @@ function pullData(config) {
 function pushData(config, data, sha) {
   var url = buildAPIURL(config)
   var json = exportToJSON(data)
-  var encoded = btoa(unescape(encodeURIComponent(json)))
+  var encoded = encodeBase64UTF8(json)
   var body = {
     message: 'Update todolist data',
     content: encoded,

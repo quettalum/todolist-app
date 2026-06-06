@@ -28,7 +28,8 @@ function createInitialState() {
     collapsedCategoryIds: [],
     undoStack: [],
     redoStack: [],
-    deleteConfirm: null
+    deleteConfirm: null,
+    sidebarOpen: false
   }
 }
 

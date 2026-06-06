@@ -57,6 +57,10 @@ function renderApp(state) {
   app.appendChild(renderHeader(state))
   app.appendChild(renderMain(state))
   app.appendChild(renderFooter(state))
+  app.appendChild(renderMobileBar(state))
+  if (state.sidebarOpen) {
+    renderSidebarBackdrop(state)
+  }
 }
 
 // --- Header 渲染 ---
@@ -71,6 +75,9 @@ function renderHeader(state) {
   var header = el('div', { className: 'header' })
 
   var leftGroup = el('div', { className: 'header-left' })
+  leftGroup.appendChild(renderButton('\u2261', function () {
+    toggleSidebar(state)
+  }, 'sidebar-toggle'))
   leftGroup.appendChild(renderButton('Sync', function () {
     if (typeof triggerSync === 'function') triggerSync(state)
   }))
@@ -128,6 +135,57 @@ function renderFooter(state) {
   return footer
 }
 
+// --- 侧边栏切换(移动端) ---
+
+function toggleSidebar(state) {
+  state.sidebarOpen = !state.sidebarOpen
+  appRender(state)
+}
+
+// --- 侧边栏遮罩 ---
+
+function renderSidebarBackdrop(state) {
+  var backdrop = el('div', { className: 'sidebar-backdrop show' })
+  backdrop.addEventListener('click', function () {
+    state.sidebarOpen = false
+    appRender(state)
+  })
+  document.getElementById('app').appendChild(backdrop)
+}
+
+// --- 移动端底部操作栏 ---
+
+function renderMobileBar(state) {
+  var bar = el('div', { className: 'mobile-bar' })
+  var tasks = getTasksByCategoryAndWeek(state.data, state.selectedCategoryId, state.currentWeekId)
+
+  bar.appendChild(renderButton('<', function () {
+    if (typeof changeWeek === 'function') changeWeek(state, 'prev')
+  }))
+
+  bar.appendChild(renderButton('+', function () {
+    showTaskCreateInput(state)
+  }))
+
+  var taskLabel = 'Toggle'
+  if (tasks.length > 0 && state.cursorPosition < tasks.length) {
+    taskLabel = tasks[state.cursorPosition].completed ? 'Uncheck' : 'Check'
+  }
+  bar.appendChild(renderButton(taskLabel, function () {
+    if (typeof toggleCurrent === 'function') toggleCurrent(state)
+  }))
+
+  bar.appendChild(renderDangerButton('Del', function () {
+    if (typeof requestDeleteCurrent === 'function') requestDeleteCurrent(state)
+  }))
+
+  bar.appendChild(renderButton('>', function () {
+    if (typeof changeWeek === 'function') changeWeek(state, 'next')
+  }))
+
+  return bar
+}
+
 // --- Main 区域渲染 ---
 
 /**
@@ -137,7 +195,9 @@ function renderFooter(state) {
  */
 function renderMain(state) {
   var main = el('div', { className: 'main' })
-  main.appendChild(renderSidebar(state))
+  var sidebar = renderSidebar(state)
+  if (state.sidebarOpen) sidebar.className += ' open'
+  main.appendChild(sidebar)
   main.appendChild(renderContent(state))
   return main
 }
@@ -388,8 +448,9 @@ function renderTaskRow(state, task, index) {
  * 输入: 按钮文字 + 点击回调
  * 输出: [label] 格式按钮 DOM
  */
-function renderButton(label, onClick) {
-  var span = el('span', { className: 'btn', onClick: onClick })
+function renderButton(label, onClick, extraClass) {
+  var cls = 'btn' + (extraClass ? ' ' + extraClass : '')
+  var span = el('span', { className: cls, onClick: onClick })
   span.textContent = '[' + label + ']'
   return span
 }

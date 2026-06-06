@@ -75,7 +75,7 @@ function renderHeader(state) {
   var header = el('div', { className: 'header' })
 
   var leftGroup = el('div', { className: 'header-left' })
-  leftGroup.appendChild(renderButton('\u2261', function () {
+  leftGroup.appendChild(renderButton('=', function () {
     toggleSidebar(state)
   }, 'sidebar-toggle'))
   leftGroup.appendChild(renderButton('Sync', function () {
@@ -303,7 +303,7 @@ function renderCategoryArrow(state, node) {
     return arrow
   }
   var collapsed = state.collapsedCategoryIds && state.collapsedCategoryIds.indexOf(node.id) !== -1
-  arrow.textContent = collapsed ? '\u25B6' : '\u25BC'
+  arrow.textContent = collapsed ? '[+]' : '[-]'
   arrow.addEventListener('click', function (e) {
     e.stopPropagation()
     toggleCategoryCollapse(state, node.id)
@@ -394,7 +394,7 @@ function renderTaskRow(state, task, index) {
   var classes = 'task-row' + (isSelected ? ' selected' : '') + (task.completed ? ' completed' : '')
   var row = el('div', { className: classes })
 
-  var check = task.completed ? '[\u2713]' : '[ ]'
+  var check = task.completed ? '[x]' : '[ ]'
   var checkSpan = el('span', { className: 'task-check', onClick: function (e) {
     e.stopPropagation()
     if (typeof toggleTask === 'function') toggleTask(state, task.id)

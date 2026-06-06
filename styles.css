@@ -192,10 +192,11 @@ body {
 
 .category-arrow {
   flex-shrink: 0;
-  width: 18px;
-  text-align: center;
+  width: 30px;
+  text-align: left;
   color: var(--fg-dim);
   cursor: pointer;
+  font-size: 12px;
 }
 
 .category-arrow:hover {
@@ -530,8 +531,8 @@ body {
   }
 
   .category-arrow {
-    width: 24px;
-    font-size: 16px;
+    width: 36px;
+    font-size: 13px;
   }
 
   /* --- Config panel full width --- */

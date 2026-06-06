@@ -33,6 +33,7 @@
 - 完成二步验证.
 - 设置过期时间(expiration date).
 - 只选择你的private数据仓库.
+- 添加Content: Read and Write权限.
 - 复制并保存Token.(该字段仅会显示一次.)
 
 #### 3. 在应用中配置
@@ -169,6 +170,7 @@ Go to [GitHub Settings → Developer settings → Personal access tokens → Fin
 - Complete two-factor authentication.
 - Set an expiration date.
 - Select **only** your private data repository.
+- Select Content:Read and Write permission.
 - Copy and save the token. (It will only be shown once.)
 
 #### 3. Configure the App

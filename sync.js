@@ -27,12 +27,11 @@ function getCloudFilePath(config) {
 }
 
 /**
- * buildAPIURL(config, pathType) -> string
- * 输入: AppConfig + "contents"|"blob"
+ * buildAPIURL(config) -> string
+ * 输入: AppConfig
  * 输出: GitHub API 完整 URL
- * pathType="contents": API 端点(含文件路径)
  */
-function buildAPIURL(config, pathType) {
+function buildAPIURL(config) {
   var parsed = parseGitHubURL(config.cloudURL)
   var filePath = getCloudFilePath(config)
   return 'https://api.github.com/repos/' + parsed.owner + '/' + parsed.repo + '/contents/' + filePath

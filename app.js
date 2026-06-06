@@ -18,13 +18,10 @@ function createInitialState() {
     currentWeekId: weekId,
     selectedCategoryId: null,
     cursorPosition: 0,
-    mode: 'normal',
     inputMode: null,
     inputCallback: null,
     onCancel: null,
     inputPlaceholder: '',
-    editTargetId: null,
-    categoryParentId: null,
     collapsedCategoryIds: [],
     undoStack: [],
     redoStack: [],
@@ -274,17 +271,6 @@ function createCategoryFromInput(state, name, parentId) {
   saveData(state.data)
   exitInputMode(state)
   state.selectedCategoryId = cat.id
-  appRender(state)
-}
-
-function doDeleteCategory(state, categoryId) {
-  var idsToRemove = collectDescendantIds(state.data.categories, categoryId)
-  idsToRemove.push(categoryId)
-  state.data = deleteCategory(state.data, categoryId)
-  if (idsToRemove.indexOf(state.selectedCategoryId) !== -1) {
-    state.selectedCategoryId = null
-  }
-  saveData(state.data)
   appRender(state)
 }
 

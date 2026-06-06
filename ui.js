@@ -714,8 +714,6 @@ function exitInputMode(state) {
   state.inputCallback = null
   state.onCancel = null
   state.inputPlaceholder = ''
-  state.editTargetId = null
-  state.categoryParentId = null
   if (typeof appRender === 'function') appRender(state)
 }
 

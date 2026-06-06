@@ -52,7 +52,6 @@ function getWeekRange(weekId) {
  * 输出: 下一周的周标识(跨越年份边界正确处理)
  */
 function nextWeekId(weekId) {
-  const { year, week } = parseWeekId(weekId)
   const range = getWeekRange(weekId)
   const nextMonday = new Date(range.end)
   nextMonday.setDate(nextMonday.getDate() + 1)
@@ -65,7 +64,6 @@ function nextWeekId(weekId) {
  * 输出: 上一周的周标识(跨越年份边界正确处理)
  */
 function prevWeekId(weekId) {
-  const { year, week } = parseWeekId(weekId)
   const range = getWeekRange(weekId)
   const prevSunday = new Date(range.start)
   prevSunday.setDate(prevSunday.getDate() - 1)

@@ -218,15 +218,6 @@ function importFromJSON(json) {
 // --- 查询辅助 ---
 
 /**
- * getTasksByWeek(data, weekId) -> Task[]
- * 输入: AppData + 周标识
- * 输出: 该周的所有任务
- */
-function getTasksByWeek(data, weekId) {
-  return data.tasks.filter(function (t) { return t.weekId === weekId })
-}
-
-/**
  * getTasksByCategoryAndWeek(data, categoryId, weekId) -> Task[]
  * 输入: AppData + 类别 ID(null=全部) + 周标识
  * 输出: 指定周和类别的任务
@@ -239,17 +230,6 @@ function getTasksByCategoryAndWeek(data, categoryId, weekId) {
     var descendants = collectDescendantIds(data.categories, categoryId)
     return descendants.indexOf(t.categoryId) !== -1
   })
-}
-
-/**
- * getChildCategoryIds(categories, parentId) -> string[]
- * 输入: 扁平 Category[] + 父类别 ID
- * 输出: 直接子类别 ID 列表
- */
-function getChildCategoryIds(categories, parentId) {
-  return categories
-    .filter(function (c) { return c.parentId === parentId })
-    .map(function (c) { return c.id })
 }
 
 /**
@@ -282,7 +262,7 @@ function ensureRecurringInstances(data, weekId) {
   next.recurringTasks.forEach(function (r) {
     var newInstances = generateTaskInstances(r, tasksByWeek)
     newInstances.forEach(function (inst) {
-      if (inst.weekId === weekId || true) {
+      if (inst.weekId === weekId) {
         var exists = next.tasks.some(function (t) {
           return t.recurringId === inst.recurringId && t.weekId === inst.weekId
         })

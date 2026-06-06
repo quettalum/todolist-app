@@ -274,3 +274,33 @@ function ensureRecurringInstances(data, weekId) {
   })
   return next
 }
+
+// --- 同步快照 ---
+
+var SYNC_SNAPSHOT_KEY = 'todolist_sync_snapshot'
+
+/**
+ * loadSyncSnapshot() -> AppData | null
+ * 输入: 无
+ * 输出: 从 localStorage 读取的上次同步成功后的 Base 快照,若不存在或解析失败则返回 null
+ */
+function loadSyncSnapshot() {
+  try {
+    var raw = localStorage.getItem(SYNC_SNAPSHOT_KEY)
+    if (raw) {
+      return JSON.parse(raw)
+    }
+  } catch (e) {
+    // 解析失败返回 null
+  }
+  return null
+}
+
+/**
+ * saveSyncSnapshot(data) -> void
+ * 输入: AppData 对象
+ * 输出: 无,将 data 作为 Base 快照写入 localStorage
+ */
+function saveSyncSnapshot(data) {
+  localStorage.setItem(SYNC_SNAPSHOT_KEY, JSON.stringify(data))
+}

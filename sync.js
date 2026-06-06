@@ -37,6 +37,43 @@ function buildAPIURL(config) {
   return 'https://api.github.com/repos/' + parsed.owner + '/' + parsed.repo + '/contents/' + filePath
 }
 
+// --- 合并辅助 ---
+
+/**
+ * idIndex(arr) -> object
+ * 输入: 对象数组
+ * 输出: {id: item} 格式的 Map 对象,按 id 索引
+ */
+function idIndex(arr) {
+  var map = {}
+  arr.forEach(function (item) { map[item.id] = item })
+  return map
+}
+
+/**
+ * copyItem(item) -> object
+ * 输入: 单个 item 对象
+ * 输出: 浅拷贝副本(仅复制所有自有属性)
+ */
+function copyItem(item) {
+  var copy = {}
+  Object.keys(item).forEach(function (key) { copy[key] = item[key] })
+  return copy
+}
+
+/**
+ * itemEqual(a, b, keys) -> boolean
+ * 输入: 两个同类型对象 + 需要对比的属性名列表
+ * 输出: 指定属性值都相等则返回 true
+ */
+function itemEqual(a, b, keys) {
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i]
+    if (a[k] !== b[k]) return false
+  }
+  return true
+}
+
 // --- 配置校验 ---
 
 /**
@@ -189,11 +226,74 @@ function pushData(config, data, sha) {
 // --- 冲突解决 ---
 
 /**
- * resolveConflict(localData, remoteData) -> AppData
- * 输入: 本地 AppData + 远程 AppData
- * 输出: 合并后的 AppData(基于任务 ID,两侧保留,以远程为基准合并)
+ * threeWayMergeArray(localArr, remoteArr, baseArr, compareKeys) -> Array
+ * 输入: 本地数组 + 远程数组 + Base快照数组 + 对比字段列表
+ * 输出: 三路合并后的数组
+ * 仿 Git merge 逻辑,对每条记录判断增/删/改:
+ *   - 仅在Base出现 → 已删除,不加入(此情况不会出现,id唯一)
+ *   - 仅在Local出现 → 本地新增,保留
+ *   - 仅在Remote出现 → 远程新增,添加
+ *   - 三边都有 → 两边均未改 → 保留; 仅本地改 → 保留本地; 仅远程改 → 用远程; 两边都改 → 远程优先
+ *   - Local+Base有而Remote无 → 远程删。本地未改则删,本地改了则保留
+ *   - Remote+Base有而Local无 → 本地删。远程未改则删,远程改了则保留
  */
-function resolveConflict(localData, remoteData) {
+function threeWayMergeArray(localArr, remoteArr, baseArr, compareKeys) {
+  var localMap = idIndex(localArr)
+  var remoteMap = idIndex(remoteArr)
+  var baseMap = idIndex(baseArr)
+
+  var allIds = {}
+  baseArr.forEach(function (x) { allIds[x.id] = true })
+  localArr.forEach(function (x) { allIds[x.id] = true })
+  remoteArr.forEach(function (x) { allIds[x.id] = true })
+
+  var result = []
+  var ids = Object.keys(allIds)
+
+  for (var i = 0; i < ids.length; i++) {
+    var id = ids[i]
+    var inLocal = !!localMap[id]
+    var inRemote = !!remoteMap[id]
+    var inBase = !!baseMap[id]
+
+    if (inBase && inLocal && inRemote) {
+      var localChanged = !itemEqual(localMap[id], baseMap[id], compareKeys)
+      var remoteChanged = !itemEqual(remoteMap[id], baseMap[id], compareKeys)
+      if (!localChanged && !remoteChanged) {
+        result.push(copyItem(localMap[id]))
+      } else if (localChanged && !remoteChanged) {
+        result.push(copyItem(localMap[id]))
+      } else if (!localChanged && remoteChanged) {
+        result.push(copyItem(remoteMap[id]))
+      } else {
+        result.push(copyItem(remoteMap[id]))
+      }
+    } else if (!inBase && inLocal && !inRemote) {
+      result.push(copyItem(localMap[id]))
+    } else if (!inBase && !inLocal && inRemote) {
+      result.push(copyItem(remoteMap[id]))
+    } else if (inBase && inLocal && !inRemote) {
+      var localChanged2 = !itemEqual(localMap[id], baseMap[id], compareKeys)
+      if (localChanged2) {
+        result.push(copyItem(localMap[id]))
+      }
+    } else if (inBase && !inLocal && inRemote) {
+      var remoteChanged2 = !itemEqual(remoteMap[id], baseMap[id], compareKeys)
+      if (remoteChanged2) {
+        result.push(copyItem(remoteMap[id]))
+      }
+    }
+  }
+  return result
+}
+
+/**
+ * simpleTwoWayMerge(localData, remoteData) -> AppData
+ * 输入: 本地 AppData + 远程 AppData
+ * 输出: 合并后的 AppData(纯增量合并,作为无Base快照时的降级方案)
+ * 逻辑: 保留本地所有条目,从远程补充本地没有的条目
+ */
+function simpleTwoWayMerge(localData, remoteData) {
   if (!remoteData) return localData
   var merged = copyData(localData)
   var localIds = {}
@@ -214,17 +314,49 @@ function resolveConflict(localData, remoteData) {
   return merged
 }
 
+/**
+ * resolveConflict(localData, remoteData, baseData) -> AppData
+ * 输入: 本地 AppData + 远程 AppData + Base快照 AppData(首次同步为null)
+ * 输出: 三路合并后的 AppData
+ * 无Base快照时降级为 simpleTwoWayMerge
+ */
+function resolveConflict(localData, remoteData, baseData) {
+  if (!remoteData) return localData
+  if (!baseData) return simpleTwoWayMerge(localData, remoteData)
+
+  var merged = copyData(localData)
+
+  merged.tasks = threeWayMergeArray(
+    localData.tasks, remoteData.tasks, baseData.tasks,
+    ['title', 'categoryId', 'weekId', 'completed', 'recurringId']
+  )
+
+  merged.categories = threeWayMergeArray(
+    localData.categories, remoteData.categories, baseData.categories,
+    ['name', 'parentId', 'order']
+  )
+
+  merged.recurringTasks = threeWayMergeArray(
+    localData.recurringTasks, remoteData.recurringTasks, baseData.recurringTasks,
+    ['title', 'categoryId', 'frequencyWeeks', 'repeatCount', 'startWeekId']
+  )
+
+  return merged
+}
+
 // --- 完整同步流程 ---
 
 /**
  * syncWithCloud(config, localData) -> Promise<{data, status}>
  * 输入: AppConfig + 本地 AppData
- * 输出: {data: AppData, status: "synced"|"pulled"|"pushed"|"error"|"no_config"}
+ * 输出: {data: AppData, status: "synced"|"pushed"|"error"|"no_config"}
+ * 流程: pull → 三路合并(使用Base快照) → push → 保存新快照
  */
 function syncWithCloud(config, localData) {
   if (!isConfigValid(config)) {
     return Promise.resolve({ data: localData, status: 'no_config' })
   }
+  var baseData = loadSyncSnapshot()
   return pullData(config).then(function (pullResult) {
     if (pullResult === null) {
       return pushData(config, localData).then(function (pushResult) {
@@ -234,10 +366,11 @@ function syncWithCloud(config, localData) {
         saveConfig(nextConfig)
         var nextData = copyData(localData)
         nextData.lastSync = formatDateISO()
+        saveSyncSnapshot(nextData)
         return { data: nextData, status: 'pushed', config: nextConfig }
       })
     }
-    var merged = resolveConflict(localData, pullResult.data)
+    var merged = resolveConflict(localData, pullResult.data, baseData)
     return pushData(config, merged, pullResult.sha).then(function (pushResult) {
       var nextConfig = {}
       Object.assign(nextConfig, config)
@@ -245,6 +378,7 @@ function syncWithCloud(config, localData) {
       saveConfig(nextConfig)
       var nextData = copyData(merged)
       nextData.lastSync = formatDateISO()
+      saveSyncSnapshot(nextData)
       return { data: nextData, status: 'synced', config: nextConfig }
     })
   }).catch(function (err) {

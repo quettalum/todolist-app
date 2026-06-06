@@ -3,7 +3,7 @@
 // ============================================================
 
 var APP_STATE = null
-var SW_VERSION = 'v9'
+var SW_VERSION = 'v10'
 
 // --- 状态管理 ---
 
@@ -418,10 +418,10 @@ function clearAllCaches() {
         return Promise.all(keys.map(function (k) { return caches.delete(k) }))
       })
     }).then(function () {
-      window.location.reload()
+      window.location.reload(true)
     })
   } else {
-    window.location.reload()
+    window.location.reload(true)
   }
 }
 

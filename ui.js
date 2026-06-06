@@ -101,7 +101,7 @@ function renderHeader(state) {
     if (typeof clearAllCaches === 'function') clearAllCaches()
   }))
   var versionTag = el('span', { className: 'header-version' })
-  versionTag.textContent = typeof SW_VERSION !== 'undefined' ? SW_VERSION : ''
+  versionTag.textContent = window.SW_ACTUAL_VERSION || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '')
   rightGroup.appendChild(versionTag)
   header.appendChild(rightGroup)
 

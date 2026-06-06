@@ -2,7 +2,7 @@
 // sw.js — Service Worker 离线缓存
 // ============================================================
 
-var CACHE_NAME = 'todolist-v11'
+var CACHE_NAME = 'todolist-v2026-6-6-12'
 
 var CACHE_FILES = [
   'index.html',
@@ -16,8 +16,11 @@ var CACHE_FILES = [
 ]
 
 self.addEventListener('message', function (event) {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (!event.data) return
+  if (event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()
+  } else if (event.data.type === 'GET_VERSION') {
+    event.source.postMessage({ type: 'VERSION', version: CACHE_NAME })
   }
 })
 

@@ -3,7 +3,6 @@
 // ============================================================
 
 var APP_STATE = null
-var SW_VERSION = 'v10'
 
 // --- 状态管理 ---
 
@@ -370,29 +369,6 @@ function triggerImport(state, json) {
   }
 }
 
-// --- Service Worker ---
-
-function registerServiceWorker() {
-  if (!('serviceWorker' in navigator)) return
-  var swPath = window.location.pathname.replace(/[^\/]*$/, '') + 'sw.js'
-  navigator.serviceWorker.register(swPath).then(function (reg) {
-    reg.addEventListener('updatefound', function () {
-      var installing = reg.installing
-      if (!installing) return
-      installing.addEventListener('statechange', function () {
-        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
-          installing.postMessage({ type: 'SKIP_WAITING' })
-          window.location.reload()
-        }
-      })
-    })
-    if (reg.waiting && navigator.serviceWorker.controller) {
-      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
-      window.location.reload()
-    }
-  }).catch(function () {})
-}
-
 // --- 渲染代理 ---
 
 function appRender(state) {
@@ -404,6 +380,49 @@ function scrollToSelectedTask() {
   var selected = document.querySelector('.task-row.selected')
   if (selected) {
     selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+}
+
+// --- Service Worker ---
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return
+  var swPath = window.location.pathname.replace(/[^\/]*$/, '') + 'sw.js'
+  navigator.serviceWorker.register(swPath).then(function (reg) {
+    querySWVersion()
+    reg.addEventListener('updatefound', function () {
+      var installing = reg.installing
+      if (!installing) return
+      installing.addEventListener('statechange', function () {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          installing.postMessage({ type: 'SKIP_WAITING' })
+          window.location.reload(true)
+        }
+      })
+    })
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+      window.location.reload(true)
+    }
+  }).catch(function () {})
+}
+
+function querySWVersion() {
+  if (!navigator.serviceWorker.controller) return
+  navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' })
+}
+
+navigator.serviceWorker.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'VERSION') {
+    window.SW_ACTUAL_VERSION = event.data.version
+    updateVersionDisplay()
+  }
+})
+
+function updateVersionDisplay() {
+  var el = document.querySelector('.header-version')
+  if (el) {
+    el.textContent = window.SW_ACTUAL_VERSION || (typeof APP_VERSION !== 'undefined' ? APP_VERSION : '')
   }
 }
 

@@ -1,0 +1,414 @@
+/* ============================================================
+   styles.css — TUI 终端风格样式表
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:            #0d1117;
+  --bg-alt:        #161b22;
+  --bg-input:      #21262d;
+  --fg:            #c9d1d9;
+  --fg-dim:        #484f58;
+  --fg-accent:     #58a6ff;
+  --fg-success:    #3fb950;
+  --fg-warning:    #d29922;
+  --fg-error:      #f85149;
+  --selection-bg:  #c9d1d9;
+  --selection-fg:  #0d1117;
+  --font:          "JetBrains Mono", "Fira Code", "Cascadia Code", "Menlo", "Monaco", monospace;
+  --font-size:     14px;
+  --line-height:   1.6;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  height: 100vh;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-input);
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 12px 16px;
+}
+
+/* --- Header --- */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0 12px 0;
+  flex-shrink: 0;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.header-center {
+  color: var(--fg-accent);
+  font-weight: bold;
+}
+
+/* --- Footer --- */
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 8px 0;
+  flex-shrink: 0;
+}
+
+.footer-spacer {
+  flex: 1;
+}
+
+/* --- Main --- */
+
+.main {
+  display: flex;
+  flex: 1;
+  gap: 24px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- Sidebar --- */
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-right: 12px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--bg-input);
+  margin: 8px 0;
+}
+
+/* --- Content --- */
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.content-category-path {
+  color: var(--fg-dim);
+  margin-bottom: 8px;
+}
+
+.task-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 8px;
+}
+
+.content-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* --- Buttons --- */
+
+.btn {
+  cursor: pointer;
+  color: var(--fg-accent);
+  white-space: nowrap;
+}
+
+.btn-danger {
+  color: var(--fg-error);
+}
+
+.btn:hover {
+  color: var(--fg);
+}
+
+.btn-danger:hover {
+  color: var(--fg-error);
+  opacity: 0.8;
+}
+
+/* --- Category Node --- */
+
+.category-node {
+  cursor: pointer;
+  padding: 2px 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+.category-node .btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.category-node .btn-danger {
+  opacity: 1;
+}
+
+.category-node:hover .btn {
+  opacity: 1;
+}
+
+.category-arrow {
+  flex-shrink: 0;
+  width: 18px;
+  text-align: center;
+  color: var(--fg-dim);
+  cursor: pointer;
+}
+
+.category-arrow:hover {
+  color: var(--fg);
+}
+
+.category-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.category-node:hover {
+  background: var(--bg-input);
+}
+
+.category-node.selected {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+/* --- Task Row --- */
+
+.task-row {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  white-space: nowrap;
+  gap: 4px;
+}
+
+.task-row:hover {
+  background: var(--bg-input);
+}
+
+.task-row.selected {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+.task-row.selected .task-tag {
+  color: var(--selection-fg);
+}
+
+.task-row.completed .task-title {
+  color: var(--fg-dim);
+  text-decoration: line-through;
+}
+
+.task-row.completed .task-check {
+  color: var(--fg-success);
+}
+
+.task-check {
+  cursor: pointer;
+  color: var(--fg-dim);
+  flex-shrink: 0;
+}
+
+.task-title {
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-tag {
+  color: var(--fg-warning);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.task-spacer {
+  flex: 1;
+}
+
+/* --- Dim text --- */
+
+.dim {
+  color: var(--fg-dim);
+}
+
+/* --- Input Line --- */
+
+.input-line {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input);
+  padding: 4px 8px;
+  margin-top: 8px;
+  border-left: 2px solid var(--fg-accent);
+}
+
+.input-field {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--fg);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  width: 100%;
+  caret-color: var(--fg-accent);
+}
+
+/* --- Confirm Prompt --- */
+
+.confirm-prompt {
+  background: var(--bg-input);
+  padding: 4px 8px;
+  margin-top: 8px;
+  border-left: 2px solid var(--fg-warning);
+  color: var(--fg-warning);
+}
+
+/* --- Config Overlay --- */
+
+.config-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.config-panel {
+  background: var(--bg-alt);
+  padding: 20px 24px;
+  min-width: 420px;
+  max-width: 520px;
+  border-left: 2px solid var(--fg-accent);
+}
+
+.config-title {
+  color: var(--fg-accent);
+  margin-bottom: 16px;
+}
+
+.config-field {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-label {
+  color: var(--fg-dim);
+  font-size: 13px;
+}
+
+.config-field .input-field {
+  background: var(--bg-input);
+  padding: 6px 8px;
+  border-left: 2px solid var(--bg-input);
+}
+
+.config-field .input-field:focus {
+  border-left: 2px solid var(--fg-accent);
+}
+
+.config-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+/* --- Increment Control --- */
+
+.increment-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  padding: 6px 8px;
+  border-left: 2px solid var(--fg-accent);
+}
+
+.increment-value {
+  color: var(--fg);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* --- Status Message --- */
+
+.status-message {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 16px;
+  background: var(--bg-alt);
+  border-left: 2px solid var(--fg-accent);
+  font-family: var(--font);
+  font-size: var(--font-size);
+  z-index: 2000;
+  white-space: nowrap;
+}
+
+.status-error {
+  border-left-color: var(--fg-error);
+  color: var(--fg-error);
+}
+
+.status-success {
+  border-left-color: var(--fg-success);
+  color: var(--fg-success);
+}
+
+.status-info {
+  border-left-color: var(--fg-accent);
+  color: var(--fg-accent);
+}

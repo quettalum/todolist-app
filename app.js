@@ -3,6 +3,7 @@
 // ============================================================
 
 var APP_STATE = null
+var SW_VERSION = 'v9'
 
 // --- 状态管理 ---
 
@@ -403,6 +404,24 @@ function scrollToSelectedTask() {
   var selected = document.querySelector('.task-row.selected')
   if (selected) {
     selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+}
+
+// --- 缓存清理 ---
+
+function clearAllCaches() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function (regs) {
+      return Promise.all(regs.map(function (r) { return r.unregister() }))
+    }).then(function () {
+      return caches.keys().then(function (keys) {
+        return Promise.all(keys.map(function (k) { return caches.delete(k) }))
+      })
+    }).then(function () {
+      window.location.reload()
+    })
+  } else {
+    window.location.reload()
   }
 }
 

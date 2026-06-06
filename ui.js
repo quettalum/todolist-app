@@ -97,6 +97,12 @@ function renderHeader(state) {
   rightGroup.appendChild(renderButton('Import', function () {
     triggerImportFile(state)
   }))
+  rightGroup.appendChild(renderDangerButton('Clear Cache', function () {
+    if (typeof clearAllCaches === 'function') clearAllCaches()
+  }))
+  var versionTag = el('span', { className: 'header-version' })
+  versionTag.textContent = typeof SW_VERSION !== 'undefined' ? SW_VERSION : ''
+  rightGroup.appendChild(versionTag)
   header.appendChild(rightGroup)
 
   return header

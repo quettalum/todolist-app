@@ -71,6 +71,12 @@ body {
   align-items: center;
 }
 
+.header-version {
+  color: var(--fg-dim);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
 .header-center {
   color: var(--fg-accent);
   font-weight: bold;

@@ -2,7 +2,7 @@
 // sw.js — Service Worker 离线缓存
 // ============================================================
 
-var CACHE_NAME = 'todolist-v9'
+var CACHE_NAME = 'todolist-v10'
 
 var CACHE_FILES = [
   'index.html',

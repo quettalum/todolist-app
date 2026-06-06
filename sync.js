@@ -203,8 +203,7 @@ function pushData(config, data, sha) {
   var encoded = encodeBase64UTF8(json)
   var body = {
     message: 'Update todolist data',
-    content: encoded,
-    branch: 'main'
+    content: encoded
   }
   if (sha) body.sha = sha
   return fetch(url, {
@@ -216,7 +215,22 @@ function pushData(config, data, sha) {
     },
     body: JSON.stringify(body)
   }).then(function (res) {
-    if (!res.ok) throw new Error('Push failed: ' + res.status)
+    if (!res.ok) {
+      if (res.status === 409) {
+        return res.json().then(function (errBody) {
+          var msg = 'Push failed: 409 Conflict'
+          if (errBody.message && errBody.message.indexOf('empty') !== -1) {
+            msg += ' - Repository may be empty. Ensure the repo has at least one commit (e.g. a README).'
+          } else if (errBody.message && errBody.message.indexOf('branch') !== -1) {
+            msg += ' - The default branch may not exist. Try initializing the repo with a commit.'
+          } else {
+            msg += ' - The file may have been modified since last pull. Try syncing again.'
+          }
+          throw new Error(msg)
+        })
+      }
+      throw new Error('Push failed: ' + res.status)
+    }
     return res.json()
   }).then(function (result) {
     return { sha: result.content.sha }

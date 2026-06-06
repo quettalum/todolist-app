@@ -2,7 +2,7 @@
 // sw.js — Service Worker 离线缓存
 // ============================================================
 
-var CACHE_NAME = 'todolist-v8'
+var CACHE_NAME = 'todolist-v9'
 
 var CACHE_FILES = [
   'index.html',
@@ -14,6 +14,12 @@ var CACHE_FILES = [
   'ui.js',
   'app.js'
 ]
+
+self.addEventListener('message', function (event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
+})
 
 self.addEventListener('install', function (event) {
   self.skipWaiting()

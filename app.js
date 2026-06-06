@@ -372,12 +372,24 @@ function triggerImport(state, json) {
 // --- Service Worker ---
 
 function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    var swPath = window.location.pathname.replace(/[^\/]*$/, '') + 'sw.js'
-    navigator.serviceWorker.register(swPath).then(function (reg) {
-    }).catch(function (err) {
+  if (!('serviceWorker' in navigator)) return
+  var swPath = window.location.pathname.replace(/[^\/]*$/, '') + 'sw.js'
+  navigator.serviceWorker.register(swPath).then(function (reg) {
+    reg.addEventListener('updatefound', function () {
+      var installing = reg.installing
+      if (!installing) return
+      installing.addEventListener('statechange', function () {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          installing.postMessage({ type: 'SKIP_WAITING' })
+          window.location.reload()
+        }
+      })
     })
-  }
+    if (reg.waiting && navigator.serviceWorker.controller) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+      window.location.reload()
+    }
+  }).catch(function () {})
 }
 
 // --- 渲染代理 ---

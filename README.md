@@ -1,26 +1,21 @@
 # Todo List
 
-一款终端风格（TUI）的周维度待办清单应用。纯前端，零依赖，离线优先，支持云端同步。
+一款终端风格（TUI）的以周为单位的待办清单应用。使用纯JS完成业务逻辑，无任何外部依赖，可离线使用。
 
 ### 功能特性
 
-- **周视图** — 按 ISO 周组织任务，支持周导航
+- **周视图** — 按 ISO 周组织任务
 - **分类管理** — 可无限嵌套的类别树
 - **重复任务** — 按自定义频率和次数自动生成任务实例
-- **TUI 美学** — 终端风格深色主题，等宽字体，`[按钮]` 风格，反色选中
 - **离线优先** — Service Worker 缓存全部静态资源，无网络亦可完整使用
 - **云端同步** — 通过 GitHub Contents API 手动同步至私密仓库
 - **导入导出** — JSON 文件导入/导出，便于备份和迁移
-- **撤销重做** — Ctrl+Z / Ctrl+Shift+Z 支持所有数据操作
-- **三路合并** — 仿 Git merge 的冲突解决，防止已删除条目在同步后复活
 
 ### 快速开始
 
-1. 克隆此仓库
-2. 启用 GitHub Pages（Settings → Pages → 从 `main` 分支部署，根目录 `/`）
-3. 访问 `https://<你的用户名>.github.io/todolist-app/`
-
-无需构建工具，无需依赖，直接打开 HTML 即可。
+直接打开`https://quettalum.github.io/todolist-app/`即可开始使用
+我们**不能**访问你的任何数据（因为数据只在本地浏览器和你**自行配置**的云端仓库存储），你也无须为此担心
+如果你还是担心数据风险，可以自行复制本仓库部署，本仓库为MIT协议，你可以自行修改代码
 
 ### 云端同步配置
 
@@ -32,11 +27,13 @@
 
 #### 2. 创建个人访问令牌
 
-前往 [GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens)，创建令牌，勾选：
+前往 [GitHub Settings → Developer settings → Personal access tokens → Fine-grained tokens]((https://github.com/settings/personal-access-tokens))，创建token。
 
-- `repo` 权限（访问私密仓库必需）
-
-复制令牌——仅显示一次。
+- Generate new token.
+- 完成二步验证.
+- 设置过期时间(expiration date).
+- 只选择你的private数据仓库.
+- 复制并保存Token.(该字段仅会显示一次.)
 
 #### 3. 在应用中配置
 

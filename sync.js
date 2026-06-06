@@ -52,6 +52,21 @@ function isConfigValid(config) {
 // --- 数据拉取 ---
 
 /**
+ * decodeBase64UTF8(base64) -> string
+ * 输入: Base64 编码的 UTF-8 字符串
+ * 输出: 正确解码的 JavaScript 字符串(支持中文等多字节字符)
+ */
+function decodeBase64UTF8(base64) {
+  var clean = base64.replace(/\s/g, '')
+  var binary = atob(clean)
+  var bytes = new Uint8Array(binary.length)
+  for (var i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i)
+  }
+  return new TextDecoder('utf-8').decode(bytes)
+}
+
+/**
  * pullData(config) -> Promise<AppData>
  * 输入: AppConfig
  * 输出: 从 GitHub 仓库拉取并解析的数据
@@ -70,7 +85,7 @@ function pullData(config) {
   }).then(function (fileData) {
     if (!fileData) return null
     var content = fileData.content
-    var decoded = atob(content.replace(/\s/g, ''))
+    var decoded = decodeBase64UTF8(content)
     var data = importFromJSON(decoded)
     return {
       data: data,

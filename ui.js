@@ -303,7 +303,7 @@ function renderCategoryArrow(state, node) {
     return arrow
   }
   var collapsed = state.collapsedCategoryIds && state.collapsedCategoryIds.indexOf(node.id) !== -1
-  arrow.textContent = collapsed ? '▶' : '▼'
+  arrow.textContent = collapsed ? '\u25B6' : '\u25BC'
   arrow.addEventListener('click', function (e) {
     e.stopPropagation()
     toggleCategoryCollapse(state, node.id)
@@ -394,7 +394,7 @@ function renderTaskRow(state, task, index) {
   var classes = 'task-row' + (isSelected ? ' selected' : '') + (task.completed ? ' completed' : '')
   var row = el('div', { className: classes })
 
-  var check = task.completed ? '[✓]' : '[ ]'
+  var check = task.completed ? '[\u2713]' : '[ ]'
   var checkSpan = el('span', { className: 'task-check', onClick: function (e) {
     e.stopPropagation()
     if (typeof toggleTask === 'function') toggleTask(state, task.id)

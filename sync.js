@@ -67,6 +67,50 @@ function decodeBase64UTF8(base64) {
 }
 
 /**
+ * recoverString(str) -> string
+ * 输入: 可能被旧客户端双重编码损坏的字符串
+ * 输出: 修复后的原始字符串,无法修复则返回原文
+ * 旧客户端 bug: atob → JSON.parse 把 UTF-8 字节当成 Latin-1 字符,
+ *   push 时再 encodeURIComponent → 产生双重 UTF-8 编码
+ * 检测: 若所有字符码点 ≤ 0xFF,可能是受损的 Latin-1 冒充串,
+ *   尝试用 UTF-8 解码还原
+ */
+function recoverString(str) {
+  if (typeof str !== 'string') return str
+  for (var i = 0; i < str.length; i++) {
+    if (str.charCodeAt(i) > 0xFF) return str
+  }
+  var bytes = new Uint8Array(str.length)
+  for (var j = 0; j < str.length; j++) {
+    bytes[j] = str.charCodeAt(j)
+  }
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch (e) {
+    return str
+  }
+}
+
+/**
+ * recoverData(data) -> AppData
+ * 输入: 拉取的数据(可能被旧客户端损坏)
+ * 输出: 修复后的数据
+ */
+function recoverData(data) {
+  if (!data) return data
+  if (data.tasks) {
+    data.tasks.forEach(function (t) { t.title = recoverString(t.title) })
+  }
+  if (data.categories) {
+    data.categories.forEach(function (c) { c.name = recoverString(c.name) })
+  }
+  if (data.recurringTasks) {
+    data.recurringTasks.forEach(function (r) { r.title = recoverString(r.title) })
+  }
+  return data
+}
+
+/**
  * pullData(config) -> Promise<AppData>
  * 输入: AppConfig
  * 输出: 从 GitHub 仓库拉取并解析的数据
@@ -87,6 +131,7 @@ function pullData(config) {
     var content = fileData.content
     var decoded = decodeBase64UTF8(content)
     var data = importFromJSON(decoded)
+    data = recoverData(data)
     return {
       data: data,
       sha: fileData.sha
